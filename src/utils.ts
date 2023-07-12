@@ -78,39 +78,42 @@ export const createMultipleNfts = async (
   return NftArray;
 };
 
+// FIX THIS
 export const createSingleNft = async (
   metaplex: Metaplex,
   assetPath: string
 ): Promise<CreateCompressedNftOutput> => {
-  const jsonBuffer = fs.readFileSync(assetPath);
-  const json = JSON.parse(jsonBuffer.toString());
-  // buffer to metaplex file
-  const imageBuffer = fs.readFileSync(assetPath.replace("json", "png"));
-  const file = toMetaplexFile(imageBuffer, json.image);
+  // Get nft json file using fs.readFileSync (You'll receive buffer format)
+  //   const jsonBuffer = ???;
+  // convern buffer to json
+  //   const json = ???;
 
-  // upload image and get image uri
-  const imageUri = await metaplex.storage().upload(file);
-  console.log("image uri:", imageUri);
+  // Get image buffer and convert it to metaplexFile
+  //   const file = toMetaplexFile(???, json.image);
+
+  // Upload image and get image uri
+  //   const imageUri = await metaplex.storage().upload(file);
+  //   console.log("image uri:", imageUri);
 
   // upload metadata and get metadata uri (off chain metadata)
-  const { uri } = await metaplex.nfts().uploadMetadata({
-    name: json.name,
-    description: json.description,
-    image: imageUri,
-  });
+  //   const { uri } = await metaplex.nfts().uploadMetadata({
+  //     name: ???,
+  //     description: ???,
+  //     image: ???,
+  //   });
 
-  console.log("metadata uri:", uri);
+  //   console.log("metadata uri:", uri);
 
-  // Send tx to Solana and create NFT
-  const data = await metaplex.nfts().create(
-    {
-      uri: uri,
-      name: json.name,
-      sellerFeeBasisPoints: json.sellerFeeBasisPoints,
-      symbol: json.symbol,
-    },
-    { commitment: "finalized" }
-  );
+  // Create NFT
+  //   const data = await metaplex.nfts().create(
+  //     {
+  //       uri: ???,
+  //       name: ???,
+  //       sellerFeeBasisPoints: ???,
+  //       symbol: ???,
+  //     },
+  //     { commitment: "finalized" }
+  //   );
 
   console.log(
     `Signature Explorer: https://explorer.solana.com/tx/${data.response.signature}?cluster=devnet$`
