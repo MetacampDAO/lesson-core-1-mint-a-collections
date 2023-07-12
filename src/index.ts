@@ -1,37 +1,55 @@
 import { initializeKeypair } from "./initializeKeypair";
 import * as web3 from "@solana/web3.js";
+import {
+  addAndVerifyCollection,
+  createCollection,
+  createMultipleNfts,
+} from "./utils";
+import {
+  Metaplex,
+  bundlrStorage,
+  keypairIdentity,
+} from "@metaplex-foundation/js";
 
 const main = async () => {
   const connection = new web3.Connection(web3.clusterApiUrl("devnet"));
   const user = await initializeKeypair(connection);
 
-  // Step 1: Create a mint
-  // Create mint: https://solana-labs.github.io/solana-program-library/token/js/functions/createMint.html
-  // Let's create a createNewMint function in src/utils.ts
-  // We can create a mint by using the method createMint: Hint => Refer to the solana-labs spl github docs above
+  console.log("PublicKey:", user.publicKey.toBase58());
 
-  // Step 2: Find ATA of user
-  // Create mint: https://solana-labs.github.io/solana-program-library/token/js/functions/getOrCreateAssociatedTokenAccount.html
-  // Create a createTokenAccount function in src/utils.ts
-  // We can get or create an ata by using the method getOrCreateAssociatedTokenAccount: Hint => Refer to the solana-labs spl github docs above
+  // 1) Create an instance of Metaplex
+  const metaplex = Metaplex.make(connection)
+    .use(keypairIdentity(user))
+    .use(
+      bundlrStorage({
+        address: "https://devnet.bundlr.network",
+        providerUrl: "https://api.devnet.solana.com",
+        timeout: 60000,
+      })
+    );
 
-  // Step 3: Mint our token to the user ATA
-  // Create mint: https://solana-labs.github.io/solana-program-library/token/js/functions/mintTo.html
-  // Create a mintTokens function in src/utils.ts
-  // We can issue new token via the mint by using the method mintTo: Hint => Refer to the solana-labs spl github docs above
-  // For the mintTo method, you need the mintInfo which you can retrieve via the method getMint
+  // 2) Create collection NFT
+  console.log(`\n***NEXT PROCESS - CREATING COLLECTION ... \n`);
+  const collectionKey = await createCollection(metaplex, "assets");
 
-  // Now that you have all 3 functions ready, let's put it together
-  // createNewMint
-  // createTokenAccount
-  // mintTokens
+  // 3) Create all NFTs
+  console.log(`\n***NEXT PROCESS - CREATING NFT(s) ... \n`);
+  const nftArray = await createMultipleNfts(metaplex, "assets");
+  console.log(`***RESULT - NUMBER OF NFT(S) CREATED: ${nftArray.length} \n`);
 
-  // Bonus Challenge!
-  // Figure out how to transfer and burn tokens
-  // Hint 1: You need to create a new user to transfer to
-  // Hint 2: Use the transfer method and the burn method
-  // Transfer: https://solana-labs.github.io/solana-program-library/token/js/functions/transfer.html
-  // Burn: https://solana-labs.github.io/solana-program-library/token/js/functions/burn.html
+  console.log(
+    `\n***NEXT PROCESS - ADDING AND VERIFYING COLLECTION ${collectionKey} TO NFT(S) ... \n`
+  );
+
+  // 4) Add and verify NFT to collection
+  const arrayOfVerifications = await addAndVerifyCollection(
+    metaplex,
+    collectionKey,
+    nftArray
+  );
+  console.log(
+    `***RESULT - NUMBER OF NFT(S) ADDED AND VERIFIED TO COLLECTION: ${arrayOfVerifications.length} \n`
+  );
 };
 
 main()
