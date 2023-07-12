@@ -41,7 +41,6 @@ export const createMultipleNfts = async (
   assetDirectory: string
 ): Promise<web3.PublicKey[]> => {
   // Checking files in asset directory
-  const imageFileType = ".png";
   const jsonType = ".json";
   const files = await fs.promises.readdir(assetDirectory);
   const jsonFiles = files.filter((file) => file.endsWith(jsonType));
